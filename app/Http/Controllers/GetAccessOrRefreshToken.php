@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 
-class GetAccessToken extends Controller
+class GetAccessOrRefreshToken extends Controller
 {
     private $client;
 
@@ -24,21 +24,24 @@ class GetAccessToken extends Controller
     }
 
     /**
-     * Attempt to get an access token with the given credentials.
+     * Attempt to get an access/refresh token with the given credentials.
      *
      * @return Response
      */
     public function __invoke()
     {
+        $formParams = [
+            'grant_type' => $this->request->has('refresh_token') ? 'refresh_token' : 'password',
+            'client_id' => env('CLIENT_ID'),
+            'client_secret' => env('CLIENT_SECRET'),
+            'refresh_token' => $this->request->input('refresh_token'),
+            'username' => $this->request->input('username', $this->request->input('email')),
+            'password' => $this->request->input('password'),
+            'scope' => '',
+        ];
+
         $response = $this->client->post(env('API_URL').'/oauth/token', [
-            'form_params' => [
-                'grant_type' => 'password',
-                'client_id' => env('CLIENT_ID'),
-                'client_secret' => env('CLIENT_SECRET'),
-                'username' => $this->request->input('username', $this->request->input('email')),
-                'password' => $this->request->input('password'),
-                'scope' => '',
-            ],
+            'form_params' => $formParams,
             'http_errors' => false,
         ]);
         

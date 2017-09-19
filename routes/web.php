@@ -18,7 +18,7 @@ $router->get('/', function () use ($router) {
 /**
  * Proxy for OAuth2 token.
  */
-$router->post('/oauth/token', 'GetAccessToken');
+$router->post('/authenticate', 'GetAccessOrRefreshToken');
 
 /**
  * Direct proxy to API_URL.
